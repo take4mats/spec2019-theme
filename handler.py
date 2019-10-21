@@ -226,27 +226,32 @@ def wallet_transfer(event, context):
             'body': json.dumps({'errorMessage': 'There was not enough money.'})
         }
 
-    wallet_table.update_item(
+
+
+    res = wallet_table.update_item(
         Key={
             'id': from_wallet['id']
         },
-        AttributeUpdates={
-            'amount': {
-                'Value': from_total_amount,
-                'Action': 'PUT'
-            }
-        }    )
-    wallet_table.update_item(
+        UpdateExpression="ADD amount :val",
+        ExpressionAttributeValues={
+                    ':val': -body['transferAmount']
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    from_total_amount = int(res['Attributes']['amount'])
+    res = wallet_table.update_item(
         Key={
             'id': to_wallet['id']
         },
-        AttributeUpdates={
-            'amount': {
-                'Value': to_total_amount,
-                'Action': 'PUT'
-            }
-        }
+        UpdateExpression="ADD amount :val",
+        ExpressionAttributeValues={
+                    ':val': body['transferAmount']
+        },
+        ReturnValues="UPDATED_NEW"
     )
+    to_total_amount = int(res['Attributes']['amount'])
+
+
     history_table.put_item(
         Item={
             'walletId': from_wallet['id'],
