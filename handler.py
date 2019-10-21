@@ -394,5 +394,13 @@ def get_payment_history(event, context):
 
 
 def _get_location_name(location_id):
-    locations = requests.get(os.environ['LOCATION_ENDPOINT']).json()
+    import os
+    import os.path
+    import json
+    TMPFILE = "/tmp/location.json"
+    if (os.path.exists(TMPFILE)):
+        locations = json.loads(open(TMPFILE, "r").read())
+    else:
+        locations = requests.get(os.environ['LOCATION_ENDPOINT']).json()
+        open(TMPFILE, "w").write(json.dumps(locations))
     return locations[str(location_id)]
