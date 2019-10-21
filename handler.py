@@ -8,25 +8,61 @@ import requests
 
 
 def user_create(event, context):
-    user_table = boto3.resource('dynamodb').Table(os.environ['USER_TABLE'])
-    wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
+    # user_table = boto3.resource('dynamodb').Table(os.environ['USER_TABLE'])
+    # wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     body = json.loads(event['body'])
 
-    print('requesr_body: ', body)
+    print('request_body: ', body)
 
-    user_table.put_item(
-        Item={
-            'id': body['id'],
-            'name': body['name']
-        }
+    client = boto3.client('dynamodb', region_name='us-west-2')
+
+    dynamodb_response = client.transact_write_items(
+        TransactItems=[
+            {
+                'Put': {
+                    'TableName': os.environ['USER_TABLE'],
+                    'Item': {
+                        'id': {
+                            'S': body['id']
+                        },
+                        'name': {
+                            'S': body['name']
+                        }
+                    }
+                }
+            },
+            {
+                'Put': {
+                    'TableName': os.environ['WALLET_TABLE'],
+                    'Item': {
+                        'id': {
+                            'S': str(uuid.uuid4())
+                        },
+                        'name': {
+                            'S': body['id'],
+                        },
+                        'amount': {
+                            'N': str(0)
+                        }
+                    }
+                }
+            }
+        ]
     )
-    wallet_table.put_item(
-        Item={
-            'id': str(uuid.uuid4()),
-            'userId': body['id'],
-            'amount': 0
-        }
-    )
+
+    # user_table.put_item(
+    #     Item={
+    #         'id': body['id'],
+    #         'name': body['name']
+    #     }
+    # )
+    # wallet_table.put_item(
+    #     Item={
+    #         'id': str(uuid.uuid4()),
+    #         'userId': body['id'],
+    #         'amount': 0
+    #     }
+    # )
     
     response = {
         'statusCode': 200,
@@ -42,7 +78,7 @@ def wallet_charge(event, context):
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     body = json.loads(event['body'])
 
-    print('requesr_body: ', body)
+    print('request_body: ', body)
 
     result = wallet_table.scan(
         ScanFilter={
