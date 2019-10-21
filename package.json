@@ -1,0 +1,25 @@
+{
+  "name": "spec2019-theme",
+  "version": "1.0.0",
+  "description": "giabbit team",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryoheimorimoto/spec2019-theme.git"
+  },
+  "keywords": [
+    "serverless"
+  ],
+  "author": "morimoto,hirosuzuki,george",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryoheimorimoto/spec2019-theme/issues"
+  },
+  "homepage": "https://github.com/ryoheimorimoto/spec2019-theme#readme",
+  "dependencies": {
+    "serverless-plugin-stage-variables": "^1.9.5"
+  }
+}

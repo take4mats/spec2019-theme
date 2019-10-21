@@ -6,7 +6,7 @@ S.P.E.C. - Serverless Performance Empowerment Challenge
 
 # Introduction
 
-小売業界大手の `Jeff Stores` はキャッシュレス決済の波に乗り遅れまいと `JeffPay` をリリースすることを決定。  
+小売業界大手の `Jeff Stores` はキャッシュレス決済の波に乗り遅れまいと `JeffPay` をリリースすることを決定。
 しかし、カード決済や既に流通している電子マネーの決済は既存のシステムの拡張で対応できるものの、独自電子マネーの管理機能だけは新規に作らなければならなかった・・・
 
 `JeffPay` のリリース期日が迫り焦った担当部長は、どこからか「どうやらServerlessという技術を採用すると早く開発ができ、性能の心配もしなくて良い」という噂を聞きつけ、寄せ集めのチームによる突貫工事でServerlessな独自の電子マネーの管理サービスを構築、なんとかリリースに間に合わせることができた。
@@ -20,6 +20,12 @@ S.P.E.C. - Serverless Performance Empowerment Challenge
 # Requirements
 - Your AWS Account
 - Serverless Framework
+
+## 追加事項 (team giabbit)
+- モジュール追加しているので
+    ```sh
+    npm install
+    ```
 
 # Deploy
 

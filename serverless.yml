@@ -22,6 +22,9 @@ provider:
       Resource:
         - "*"
 
+# plugins:
+#   - serverless-plugin-stage-variables  # for apigw logging
+
 functions:
   CreateUser:
     handler: handler.user_create
@@ -100,3 +103,12 @@ resources:
             KeyType: HASH
           - AttributeName: transactionId
             KeyType: RANGE
+    # ApiGatewayStage:  # for apigw logging
+    #   Type: AWS::ApiGateway::stage
+    #   Properties:
+    #     MethodSettings:
+    #       - DataTraceEnabled: true
+    #         HttpMethod: "*"
+    #         LoggingLevel: INFO
+    #         ResourcePath: "/*"
+    #         MetricsEnabled: true
