@@ -257,7 +257,7 @@ def wallet_transfer(event, context):
     )
     history_table.put_item(
         Item={
-            'walletId': from_wallet['id'],
+            'walletId': to_wallet['id'],
             'transactionId': body['transactionId'],
             'chargeAmount': body['transferAmount'],
             'locationId': body['locationId'],
