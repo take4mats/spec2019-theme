@@ -268,7 +268,6 @@ def get_user_summary(event, context):
     user = user_table.get_item(
         Key={'id': params['userId']}
     )
-    
 
     wallet = _queryWalletByUserId(wallet_table, params['userId']).get('Items').pop()
 
@@ -293,7 +292,6 @@ def get_user_summary(event, context):
             times_per_location[location_name] = 1
         else:
             times_per_location[location_name] += 1
-
 
     response = {
         'statusCode': 200,
@@ -364,6 +362,7 @@ def _queryWalletByUserId(table, userId):
         }
     )
 
+
 def _get_location_name(location_id):
     import os
     import os.path
@@ -375,6 +374,7 @@ def _get_location_name(location_id):
         locations = requests.get(os.environ['LOCATION_ENDPOINT']).json()
         open(TMPFILE, "w").write(json.dumps(locations))
     return locations[str(location_id)]
+
 
 def _send_message_to_sqs(data):
     sqs = boto3.client('sqs')
