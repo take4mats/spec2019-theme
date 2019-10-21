@@ -154,17 +154,17 @@ def wallet_use(event, context):
             'body': json.dumps({'errorMessage': 'There was not enough money.'})
         }
 
-    wallet_table.update_item(
+    res = wallet_table.update_item(
         Key={
             'id': user_wallet['id']
         },
-        AttributeUpdates={
-            'amount': {
-                'Value': total_amount,
-                'Action': 'PUT'
-            }
-        }
+        UpdateExpression="ADD amount :val",
+        ExpressionAttributeValues={
+                    ':val': -body['chargeAmount']
+        },
+        ReturnValues="UPDATED_NEW"
     )
+    
     history_table.put_item(
         Item={
             'walletId': user_wallet['id'],
@@ -178,7 +178,7 @@ def wallet_use(event, context):
         'transactionId': body['transactionId'],
         'userId': body['userId'],
         'useAmount': body['useAmount'],
-        'totalAmount': int(total_amount)
+        'totalAmount': int(res['Attributes']['amount'])
     })
 
     response = {
