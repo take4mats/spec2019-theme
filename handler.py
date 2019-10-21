@@ -116,6 +116,16 @@ def wallet_charge(event, context):
         ReturnValues="UPDATED_NEW"
     )
     
+    wallet_table.update_item(
+        Key={
+            'id': user_wallet['id']
+        },
+        UpdateExpression="ADD loccount_%s :val" % (body['locationId']),
+        ExpressionAttributeValues={
+                    ':val': 1
+        },
+        ReturnValues="UPDATED_NEW"
+    )
     
     history_table.put_item(
         Item={
@@ -188,6 +198,17 @@ def wallet_use(event, context):
         ReturnValues="UPDATED_NEW"
     )
     
+    
+    wallet_table.update_item(
+        Key={
+            'id': user_wallet['id']
+        },
+        UpdateExpression="ADD loccount_%s :val" % (body['locationId']),
+        ExpressionAttributeValues={
+                    ':val': 1
+        },
+        ReturnValues="UPDATED_NEW"
+    )
     
     history_table.put_item(
         Item={
@@ -296,6 +317,27 @@ def wallet_transfer(event, context):
         ReturnValues="UPDATED_NEW"
     )
     
+    wallet_table.update_item(
+        Key={
+            'id': from_wallet['id']
+        },
+        UpdateExpression="ADD loccount_%s :val" % body['locationId'],
+        ExpressionAttributeValues={
+                    ':val': 1
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    wallet_table.update_item(
+        Key={
+            'id': to_wallet['id']
+        },
+        UpdateExpression="ADD loccount_%s :val" % body['locationId'],
+        ExpressionAttributeValues={
+                    ':val': 1
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
     
 
 
@@ -359,6 +401,8 @@ def get_user_summary(event, context):
             }
         }
     ).get('Items').pop()
+
+    """
     payment_history = history_table.scan(
         ScanFilter={
             'walletId': {
@@ -380,18 +424,25 @@ def get_user_summary(event, context):
             times_per_location[location_name] = 1
         else:
             times_per_location[location_name] += 1
+    """
 
+    loccount = {}
+    for k in wallet:
+        if k.startswith("loccount_"):
+            t = k[9:]
+            loccount[_get_location_name(t)] = int(wallet[k])
 
     response = {
         'statusCode': 200,
         'body': json.dumps({
             'userName': user['Item']['name'],
             'currentAmount': int(wallet['amount']),
-            'totalChargeAmount': int(sum_charge),
-            'totalUseAmount': int(sum_payment),
-            'totalChargeAmount2': int(wallet['totalChargeAmount']),
-            'totalUseAmount2': int(wallet['totalUseAmount']),
-            'timesPerLocation': times_per_location
+            #'totalChargeAmount': int(sum_charge),
+            #'totalUseAmount': int(sum_payment),
+            #'timesPerLocation': times_per_location
+            'totalChargeAmount': int(wallet['totalChargeAmount']),
+            'totalUseAmount': int(wallet['totalUseAmount']),
+            'timesPerLocation': loccount,
         })
     }
     print('res: ', response)
