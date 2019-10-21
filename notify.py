@@ -6,7 +6,7 @@ from datetime import datetime
 import boto3
 import requests
 
-def main():
+def main(event, context):
     sqs = boto3.client('sqs')
     q_url = os.environ['QUEUE_URL']
 
