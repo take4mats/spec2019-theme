@@ -63,7 +63,7 @@ def user_create(event, context):
             'amount': 0
         }
     )
-    
+
     response = {
         'statusCode': 200,
         'body': json.dumps({'result': 'ok'})
@@ -102,8 +102,8 @@ def wallet_charge(event, context):
         },
         ReturnValues="UPDATED_NEW"
     )
-    
-    
+
+
     history_table.put_item(
         Item={
             'walletId': user_wallet['id'],
@@ -119,6 +119,8 @@ def wallet_charge(event, context):
         'chargeAmount': body['chargeAmount'],
         'totalAmount': int(res['Attributes']['amount'])
     })
+
+    _send_message_to_sqs()
 
     response = {
         'statusCode': 202,
@@ -164,7 +166,7 @@ def wallet_use(event, context):
         },
         ReturnValues="UPDATED_NEW"
     )
-    
+
     history_table.put_item(
         Item={
             'walletId': user_wallet['id'],
@@ -410,3 +412,25 @@ def _get_location_name(location_id):
         locations = requests.get(os.environ['LOCATION_ENDPOINT']).json()
         open(TMPFILE, "w").write(json.dumps(locations))
     return locations[str(location_id)]
+
+def _send_message_to_sqs():
+    sqs = boto3.client('sqs')
+    q_url = os.environ['QUEUE_URL']
+    # q_url = 'https://sqs.us-west-2.amazonaws.com/267413481760/notification-q-dev'
+
+    d = {
+        'transactionId': '1',
+        'userId': '2',
+        'chargeAmount': '3',
+        'totalAmount': '4'
+    }
+
+    response = sqs.send_message(
+        QueueUrl=q_url,
+        DelaySeconds=0,
+        MessageBody=(
+            json.dumps(d)
+        )
+    )
+
+    print(response)
