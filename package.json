@@ -21,5 +21,12 @@
   "homepage": "https://github.com/ryoheimorimoto/spec2019-theme#readme",
   "dependencies": {
     "serverless-plugin-stage-variables": "^1.9.5"
+  },
+  "devDependencies": {
+    "serverless-dynamodb-autoscaling": "^0.6.2",
+    "serverless-dynamodb-local": "^0.2.38",
+    "serverless-offline-python": "^3.22.1",
+    "serverless-prune-plugin": "^1.4.1",
+    "serverless-python-requirements": "^5.0.0"
   }
 }
