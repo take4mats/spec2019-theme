@@ -14,42 +14,6 @@ def user_create(event, context):
 
     print('request_body: ', body)
 
-    client = boto3.client('dynamodb', region_name='us-west-2')
-
-    # dynamodb_response = client.transact_write_items(
-    #     TransactItems=[
-    #         {
-    #             'Put': {
-    #                 'TableName': os.environ['USER_TABLE'],
-    #                 'Item': {
-    #                     'id': {
-    #                         'S': body['id']
-    #                     },
-    #                     'name': {
-    #                         'S': body['name']
-    #                     }
-    #                 }
-    #             }
-    #         },
-    #         {
-    #             'Put': {
-    #                 'TableName': os.environ['WALLET_TABLE'],
-    #                 'Item': {
-    #                     'id': {
-    #                         'S': str(uuid.uuid4())
-    #                     },
-    #                     'name': {
-    #                         'S': body['id'],
-    #                     },
-    #                     'amount': {
-    #                         'N': str(0)
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # )
-
     user_table.put_item(
         Item={
             'id': body['id'],
@@ -80,16 +44,17 @@ def wallet_charge(event, context):
 
     print('request_body: ', body)
 
-    result = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    body['userId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+    result = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': body['userId']
         }
     )
+
     user_wallet = result['Items'].pop()
 
     res = wallet_table.update_item(
@@ -136,16 +101,17 @@ def wallet_use(event, context):
 
     print('requesr_body: ', body)
 
-    result = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    body['userId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+    result = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': body['userId']
         }
     )
+
     user_wallet = result['Items'].pop()
     total_amount = user_wallet['amount'] - body['useAmount']
     if total_amount < 0:
@@ -197,24 +163,25 @@ def wallet_transfer(event, context):
 
     print('requesr_body: ', body)
 
-    from_wallet = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    body['fromUserId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+    from_wallet = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': body['fromUserId']
         }
     ).get('Items').pop()
-    to_wallet = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    body['toUserId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+
+    to_wallet = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': body['toUserId']
         }
     ).get('Items').pop()
 
@@ -302,16 +269,17 @@ def get_user_summary(event, context):
     user = user_table.get_item(
         Key={'id': params['userId']}
     )
-    wallet = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    params['userId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+    wallet = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': params['userId']
         }
     ).get('Items').pop()
+
     payment_history = history_table.scan(
         ScanFilter={
             'walletId': {
@@ -354,16 +322,18 @@ def get_payment_history(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     params = event['pathParameters']
-    wallet = wallet_table.scan(
-        ScanFilter={
-            'userId': {
-                'AttributeValueList': [
-                    params['userId']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
+
+    wallet = wallet_table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': params['userId']
         }
     ).get('Items').pop()
+
     payment_history_result = history_table.scan(
         ScanFilter={
             'walletId': {
