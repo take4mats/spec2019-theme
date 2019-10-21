@@ -73,6 +73,15 @@ functions:
       - http:
           path: users/{userId}/history
           method: get
+  # Notify
+  Notify:
+    handler: notify.main
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:  # CloudFormation embedded function to get ARN
+              - NotificationQ
+              - Arn
 
 resources:
   Resources:
