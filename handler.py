@@ -60,7 +60,9 @@ def user_create(event, context):
         Item={
             'id': str(uuid.uuid4()),
             'userId': body['id'],
-            'amount': 0
+            'amount': 0,
+            'totalChargeAmount': 0,
+            'totalUseAmount': 0
         }
     )
     
@@ -97,6 +99,17 @@ def wallet_charge(event, context):
             'id': user_wallet['id']
         },
         UpdateExpression="ADD amount :val",
+        ExpressionAttributeValues={
+                    ':val': body['chargeAmount']
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
+    wallet_table.update_item(
+        Key={
+            'id': user_wallet['id']
+        },
+        UpdateExpression="ADD totalChargeAmount :val",
         ExpressionAttributeValues={
                     ':val': body['chargeAmount']
         },
@@ -164,6 +177,17 @@ def wallet_use(event, context):
         },
         ReturnValues="UPDATED_NEW"
     )
+    wallet_table.update_item(
+        Key={
+            'id': user_wallet['id']
+        },
+        UpdateExpression="ADD totalUseAmount :val",
+        ExpressionAttributeValues={
+                    ':val': body['useAmount']
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
     
     history_table.put_item(
         Item={
@@ -250,6 +274,29 @@ def wallet_transfer(event, context):
         ReturnValues="UPDATED_NEW"
     )
     to_total_amount = int(res['Attributes']['amount'])
+    
+    wallet_table.update_item(
+        Key={
+            'id': from_wallet['id']
+        },
+        UpdateExpression="ADD totalUseAmount :val",
+        ExpressionAttributeValues={
+                    ':val': body['transferAmount']
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    wallet_table.update_item(
+        Key={
+            'id': to_wallet['id']
+        },
+        UpdateExpression="ADD totalChargeAmount :val",
+        ExpressionAttributeValues={
+                    ':val': body['transferAmount']
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
+    
 
 
     history_table.put_item(
@@ -342,6 +389,8 @@ def get_user_summary(event, context):
             'currentAmount': int(wallet['amount']),
             'totalChargeAmount': int(sum_charge),
             'totalUseAmount': int(sum_payment),
+            'totalChargeAmount2': int(wallet['totalChargeAmount']),
+            'totalUseAmount2': int(wallet['totalUseAmount']),
             'timesPerLocation': times_per_location
         })
     }
