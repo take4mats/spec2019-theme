@@ -11,6 +11,9 @@ def user_create(event, context):
     user_table = boto3.resource('dynamodb').Table(os.environ['USER_TABLE'])
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     body = json.loads(event['body'])
+
+    print(body)
+
     user_table.put_item(
         Item={
             'id': body['id'],
@@ -267,7 +270,7 @@ def get_user_summary(event, context):
             times_per_location[location_name] = 1
         else:
             times_per_location[location_name] += 1
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({
