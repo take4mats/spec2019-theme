@@ -160,7 +160,7 @@ def wallet_use(event, context):
         },
         UpdateExpression="ADD amount :val",
         ExpressionAttributeValues={
-                    ':val': -body['chargeAmount']
+                    ':val': -body['useAmount']
         },
         ReturnValues="UPDATED_NEW"
     )
