@@ -27,10 +27,14 @@ def user_create(event, context):
             'amount': 0
         }
     )
-    return {
+    
+    response = {
         'statusCode': 200,
         'body': json.dumps({'result': 'ok'})
     }
+    print('res: ', response)
+
+    return response
 
 
 def wallet_charge(event, context):
@@ -79,10 +83,13 @@ def wallet_charge(event, context):
         'totalAmount': int(total_amount)
     })
 
-    return {
+    response = {
         'statusCode': 202,
         'body': json.dumps({'result': 'Assepted. Please wait for the notification.'})
     }
+    print('res: ', response)
+
+    return response
 
 
 def wallet_use(event, context):
@@ -137,10 +144,13 @@ def wallet_use(event, context):
         'totalAmount': int(total_amount)
     })
 
-    return {
+    response = {
         'statusCode': 202,
         'body': json.dumps({'result': 'Assepted. Please wait for the notification.'})
     }
+    print('res: ', response)
+
+    return response
 
 
 def wallet_transfer(event, context):
@@ -234,10 +244,13 @@ def wallet_transfer(event, context):
         'transferFrom': body['fromUserId']
     })
 
-    return {
+    response = {
         'statusCode': 202,
         'body': json.dumps({'result': 'Assepted. Please wait for the notification.'})
     }
+    print('res: ', response)
+
+    return response
 
 
 def get_user_summary(event, context):
@@ -280,7 +293,8 @@ def get_user_summary(event, context):
         else:
             times_per_location[location_name] += 1
 
-    return {
+
+    response = {
         'statusCode': 200,
         'body': json.dumps({
             'userName': user['Item']['name'],
@@ -290,6 +304,9 @@ def get_user_summary(event, context):
             'timesPerLocation': times_per_location
         })
     }
+    print('res: ', response)
+
+    return response
 
 
 def get_payment_history(event, context):
@@ -332,10 +349,13 @@ def get_payment_history(event, context):
         key=lambda x:x['timestamp'],
         reverse=True))
 
-    return {
+    response = {
         'statusCode': 200,
         'body': json.dumps(sorted_payment_history)
     }
+    print('res: ', response)
+
+    return response
 
 
 def _get_location_name(location_id):
