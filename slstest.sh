@@ -40,11 +40,11 @@ curl $BASEURL/users/$USERB/history | jq .
 echo
 
 echo curl $BASEURL/users/$USERA/summary
-curl $BASEURL/users/$USERA/summary 
+curl $BASEURL/users/$USERA/summary
 echo
 
 echo curl $BASEURL/users/$USERB/summary
-curl $BASEURL/users/$USERB/summary 
+curl $BASEURL/users/$USERB/summary
 echo
 
 
