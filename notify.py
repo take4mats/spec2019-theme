@@ -7,6 +7,7 @@ import boto3
 import requests
 
 def main(event, context):
+    print('hello are you alive?')
     sqs = boto3.client('sqs')
     q_url = os.environ['QUEUE_URL']
 

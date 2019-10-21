@@ -68,12 +68,12 @@ def wallet_charge(event, context):
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
     )
-    # requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
-    #     'transactionId': body['transactionId'],
-    #     'userId': body['userId'],
-    #     'chargeAmount': body['chargeAmount'],
-    #     'totalAmount': int(res['Attributes']['amount'])
-    # })
+    requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
+        'transactionId': body['transactionId'],
+        'userId': body['userId'],
+        'chargeAmount': body['chargeAmount'],
+        'totalAmount': int(res['Attributes']['amount'])
+    })
 
     # offload to sqs
     obj = {
@@ -130,12 +130,12 @@ def wallet_use(event, context):
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
     )
-    # requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
-    #     'transactionId': body['transactionId'],
-    #     'userId': body['userId'],
-    #     'useAmount': body['useAmount'],
-    #     'totalAmount': int(res['Attributes']['amount'])
-    # })
+    requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
+        'transactionId': body['transactionId'],
+        'userId': body['userId'],
+        'useAmount': body['useAmount'],
+        'totalAmount': int(res['Attributes']['amount'])
+    })
 
     # offload to sqs
     obj = {
@@ -215,13 +215,13 @@ def wallet_transfer(event, context):
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
     )
-    # requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
-    #     'transactionId': body['transactionId'],
-    #     'userId': body['fromUserId'],
-    #     'useAmount': body['transferAmount'],
-    #     'totalAmount': int(from_total_amount),
-    #     'transferTo': body['toUserId']
-    # })
+    requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
+        'transactionId': body['transactionId'],
+        'userId': body['fromUserId'],
+        'useAmount': body['transferAmount'],
+        'totalAmount': int(from_total_amount),
+        'transferTo': body['toUserId']
+    })
 
     # offload to sqs
     obj = {
@@ -233,13 +233,13 @@ def wallet_transfer(event, context):
     }
     _send_message_to_sqs(obj)
 
-    # requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
-    #     'transactionId': body['transactionId'],
-    #     'userId': body['toUserId'],
-    #     'chargeAmount': body['transferAmount'],
-    #     'totalAmount': int(to_total_amount),
-    #     'transferFrom': body['fromUserId']
-    # })
+    requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
+        'transactionId': body['transactionId'],
+        'userId': body['toUserId'],
+        'chargeAmount': body['transferAmount'],
+        'totalAmount': int(to_total_amount),
+        'transferFrom': body['fromUserId']
+    })
 
     # offload to sqs
     obj = {
