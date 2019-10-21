@@ -44,17 +44,7 @@ def wallet_charge(event, context):
 
     print('request_body: ', body)
 
-    result = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': body['userId']
-        }
-    )
-
+    result = _queryWalletByUserId(wallet_table, body['userId'])
     user_wallet = result['Items'].pop()
 
     res = wallet_table.update_item(
@@ -101,18 +91,9 @@ def wallet_use(event, context):
 
     print('requesr_body: ', body)
 
-    result = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': body['userId']
-        }
-    )
-
+    result = _queryWalletByUserId(wallet_table, body['userId'])
     user_wallet = result['Items'].pop()
+
     total_amount = user_wallet['amount'] - body['useAmount']
     if total_amount < 0:
         return {
@@ -163,27 +144,8 @@ def wallet_transfer(event, context):
 
     print('requesr_body: ', body)
 
-    from_wallet = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': body['fromUserId']
-        }
-    ).get('Items').pop()
-
-    to_wallet = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': body['toUserId']
-        }
-    ).get('Items').pop()
+    from_wallet = _queryWalletByUserId(wallet_table, body['fromUserId']).get('Items').pop()
+    to_wallet = _queryWalletByUserId(wallet_table, body['toUserId']).get('Items').pop()
 
     from_total_amount = from_wallet['amount'] - body['transferAmount']
     to_total_amount = to_wallet['amount'] + body['transferAmount']
@@ -192,8 +154,6 @@ def wallet_transfer(event, context):
             'statusCode': 400,
             'body': json.dumps({'errorMessage': 'There was not enough money.'})
         }
-
-
 
     res = wallet_table.update_item(
         Key={
@@ -269,16 +229,9 @@ def get_user_summary(event, context):
     user = user_table.get_item(
         Key={'id': params['userId']}
     )
-    wallet = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': params['userId']
-        }
-    ).get('Items').pop()
+    
+
+    wallet = _queryWalletByUserId(wallet_table, params['userId']).get('Items').pop()
 
     payment_history = history_table.scan(
         ScanFilter={
@@ -323,16 +276,7 @@ def get_payment_history(event, context):
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     params = event['pathParameters']
 
-    wallet = wallet_table.query(
-        IndexName='userId-index',
-        KeyConditionExpression='#k = :val',
-        ExpressionAttributeNames={
-            '#k': 'userId'
-        },
-        ExpressionAttributeValues={
-            ':val': params['userId']
-        }
-    ).get('Items').pop()
+    wallet = _queryWalletByUserId(wallet_table, params['userId']).get('Items').pop()
 
     payment_history_result = history_table.scan(
         ScanFilter={
@@ -368,6 +312,18 @@ def get_payment_history(event, context):
 
     return response
 
+
+def _queryWalletByUserId(table, userId):
+    return table.query(
+        IndexName='userId-index',
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'userId'
+        },
+        ExpressionAttributeValues={
+            ':val': userId
+        }
+    )
 
 def _get_location_name(location_id):
     import os
