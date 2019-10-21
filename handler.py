@@ -91,18 +91,19 @@ def wallet_charge(event, context):
         }
     )
     user_wallet = result['Items'].pop()
-    total_amount = user_wallet['amount'] + body['chargeAmount']
-    wallet_table.update_item(
+
+    res = wallet_table.update_item(
         Key={
             'id': user_wallet['id']
         },
-        AttributeUpdates={
-            'amount': {
-                'Value': total_amount,
-                'Action': 'PUT'
-            }
-        }
+        UpdateExpression="ADD amount :val",
+        ExpressionAttributeValues={
+                    ':val': body['chargeAmount']
+        },
+        ReturnValues="UPDATED_NEW"
     )
+    
+    
     history_table.put_item(
         Item={
             'walletId': user_wallet['id'],
@@ -116,7 +117,7 @@ def wallet_charge(event, context):
         'transactionId': body['transactionId'],
         'userId': body['userId'],
         'chargeAmount': body['chargeAmount'],
-        'totalAmount': int(total_amount)
+        'totalAmount': int(res['Attributes']['amount'])
     })
 
     response = {
