@@ -44,7 +44,7 @@ def wallet_charge(event, context):
 
     print('request_body: ', body)
 
-    result = _queryWalletByUserId(wallet_table, body['userId'])
+    result = _query_wallet_by_user_id(wallet_table, body['userId'])
     user_wallet = result['Items'].pop()
 
     res = wallet_table.update_item(
@@ -100,7 +100,7 @@ def wallet_use(event, context):
 
     print('requesr_body: ', body)
 
-    result = _queryWalletByUserId(wallet_table, body['userId'])
+    result = _query_wallet_by_user_id(wallet_table, body['userId'])
     user_wallet = result['Items'].pop()
 
     total_amount = user_wallet['amount'] - body['useAmount']
@@ -162,8 +162,8 @@ def wallet_transfer(event, context):
 
     print('requesr_body: ', body)
 
-    from_wallet = _queryWalletByUserId(wallet_table, body['fromUserId']).get('Items').pop()
-    to_wallet = _queryWalletByUserId(wallet_table, body['toUserId']).get('Items').pop()
+    from_wallet = _query_wallet_by_user_id(wallet_table, body['fromUserId']).get('Items').pop()
+    to_wallet = _query_wallet_by_user_id(wallet_table, body['toUserId']).get('Items').pop()
 
     from_total_amount = from_wallet['amount'] - body['transferAmount']
     to_total_amount = to_wallet['amount'] + body['transferAmount']
@@ -269,18 +269,19 @@ def get_user_summary(event, context):
         Key={'id': params['userId']}
     )
 
-    wallet = _queryWalletByUserId(wallet_table, params['userId']).get('Items').pop()
+    wallet = _query_wallet_by_user_id(wallet_table, params['userId']).get('Items').pop()
 
-    payment_history = history_table.scan(
-        ScanFilter={
-            'walletId': {
-                'AttributeValueList': [
-                    wallet['id']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
-        }
-    )
+    payment_history = _query_history_by_wallet_id(history_table, wallet['id'])
+    # payment_history = history_table.scan(
+    #     ScanFilter={
+    #         'walletId': {
+    #             'AttributeValueList': [
+    #                 wallet['id']
+    #             ],
+    #             'ComparisonOperator': 'EQ'
+    #         }
+    #     }
+    # )
     sum_charge = 0
     sum_payment = 0
     times_per_location = {}
@@ -313,18 +314,20 @@ def get_payment_history(event, context):
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     params = event['pathParameters']
 
-    wallet = _queryWalletByUserId(wallet_table, params['userId']).get('Items').pop()
+    wallet = _query_wallet_by_user_id(wallet_table, params['userId']).get('Items').pop()
 
-    payment_history_result = history_table.scan(
-        ScanFilter={
-            'walletId': {
-                'AttributeValueList': [
-                    wallet['id']
-                ],
-                'ComparisonOperator': 'EQ'
-            }
-        }
-    )
+    payment_history_result = _query_history_by_wallet_id(history_table, wallet['id'])
+
+    # payment_history_result = history_table.scan(
+    #     ScanFilter={
+    #         'walletId': {
+    #             'AttributeValueList': [
+    #                 wallet['id']
+    #             ],
+    #             'ComparisonOperator': 'EQ'
+    #         }
+    #     }
+    # )
 
     payment_history = []
     for p in payment_history_result['Items']:
@@ -350,7 +353,7 @@ def get_payment_history(event, context):
     return response
 
 
-def _queryWalletByUserId(table, userId):
+def _query_wallet_by_user_id(table, user_id):
     return table.query(
         IndexName='userId-index',
         KeyConditionExpression='#k = :val',
@@ -358,10 +361,20 @@ def _queryWalletByUserId(table, userId):
             '#k': 'userId'
         },
         ExpressionAttributeValues={
-            ':val': userId
+            ':val': user_id
         }
     )
 
+def _query_history_by_wallet_id(table, wallet_id):
+    return table.query(
+        KeyConditionExpression='#k = :val',
+        ExpressionAttributeNames={
+            '#k': 'walletId'
+        },
+        ExpressionAttributeValues={
+            ':val': wallet_id
+        }
+    )
 
 def _get_location_name(location_id):
     import os
