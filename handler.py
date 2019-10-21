@@ -218,7 +218,7 @@ def wallet_transfer(event, context):
     ).get('Items').pop()
 
     from_total_amount = from_wallet['amount'] - body['transferAmount']
-    to_total_amount = from_wallet['amount'] + body['transferAmount']
+    to_total_amount = to_wallet['amount'] + body['transferAmount']
     if from_total_amount < 0:
         return {
             'statusCode': 400,
