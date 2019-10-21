@@ -15,15 +15,22 @@ provider:
       Ref: PaymentHistoryTable
     NOTIFICATION_ENDPOINT: "https://dkxmaha7zk.execute-api.us-west-2.amazonaws.com/prod/notification"
     LOCATION_ENDPOINT: "https://dkxmaha7zk.execute-api.us-west-2.amazonaws.com/prod/location"
+    QUEUE_URL:  # SQS の URL が Lambda で必要で、こうやれば動的に与えられる
+      Ref: NotificationQ
   iamRoleStatements:
     - Effect: Allow
       Action:
         - "dynamodb:*"
+        - 'sqs:*'
       Resource:
         - "*"
 
-# plugins:
-#   - serverless-plugin-stage-variables  # for apigw logging
+plugins:
+  - serverless-dynamodb-local  # enable DynamoDB local
+  - serverless-offline-python
+  - serverless-prune-plugin  # deletes old version of CloudFormation stack deployments
+  - serverless-python-requirements  # allow pip
+  # - serverless-plugin-stage-variables  # for apigw logging
 
 functions:
   CreateUser:
@@ -113,6 +120,11 @@ resources:
             KeyType: HASH
           - AttributeName: transactionId
             KeyType: RANGE
+
+    NotificationQ:  # SQS
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: notification-q-dev
 
     # ApiGatewayStage:  # for apigw logging
     #   Type: AWS::ApiGateway::stage
