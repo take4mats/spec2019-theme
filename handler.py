@@ -12,7 +12,7 @@ def user_create(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     body = json.loads(event['body'])
 
-    print("req body: ", body)
+    print('requesr_body: ', body)
 
     user_table.put_item(
         Item={
@@ -37,6 +37,9 @@ def wallet_charge(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     body = json.loads(event['body'])
+
+    print('requesr_body: ', body)
+
     result = wallet_table.scan(
         ScanFilter={
             'userId': {
@@ -86,6 +89,9 @@ def wallet_use(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     body = json.loads(event['body'])
+
+    print('requesr_body: ', body)
+
     result = wallet_table.scan(
         ScanFilter={
             'userId': {
@@ -141,6 +147,9 @@ def wallet_transfer(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     history_table = boto3.resource('dynamodb').Table(os.environ['PAYMENT_HISTORY_TABLE'])
     body = json.loads(event['body'])
+
+    print('requesr_body: ', body)
+
     from_wallet = wallet_table.scan(
         ScanFilter={
             'userId': {
