@@ -120,7 +120,14 @@ def wallet_charge(event, context):
         'totalAmount': int(res['Attributes']['amount'])
     })
 
-    _send_message_to_sqs()
+    # offload to sqs
+    obj = {
+        'transactionId': body['transactionId'],
+        'userId': body['userId'],
+        'chargeAmount': body['chargeAmount'],
+        'totalAmount': int(res['Attributes']['amount'])
+    }
+    _send_message_to_sqs(obj)
 
     response = {
         'statusCode': 202,
@@ -182,6 +189,15 @@ def wallet_use(event, context):
         'useAmount': body['useAmount'],
         'totalAmount': int(res['Attributes']['amount'])
     })
+
+    # offload to sqs
+    obj = {
+        'transactionId': body['transactionId'],
+        'userId': body['userId'],
+        'useAmount': body['useAmount'],
+        'totalAmount': int(res['Attributes']['amount'])
+    }
+    _send_message_to_sqs(obj)
 
     response = {
         'statusCode': 202,
@@ -279,6 +295,17 @@ def wallet_transfer(event, context):
         'totalAmount': int(from_total_amount),
         'transferTo': body['toUserId']
     })
+
+    # offload to sqs
+    obj = {
+        'transactionId': body['transactionId'],
+        'userId': body['fromUserId'],
+        'useAmount': body['transferAmount'],
+        'totalAmount': int(from_total_amount),
+        'transferTo': body['toUserId']
+    }
+    _send_message_to_sqs(obj)
+
     requests.post(os.environ['NOTIFICATION_ENDPOINT'], json={
         'transactionId': body['transactionId'],
         'userId': body['toUserId'],
@@ -286,6 +313,16 @@ def wallet_transfer(event, context):
         'totalAmount': int(to_total_amount),
         'transferFrom': body['fromUserId']
     })
+
+    # offload to sqs
+    obj = {
+        'transactionId': body['transactionId'],
+        'userId': body['toUserId'],
+        'chargeAmount': body['transferAmount'],
+        'totalAmount': int(to_total_amount),
+        'transferFrom': body['fromUserId']
+    }
+    _send_message_to_sqs(obj)
 
     response = {
         'statusCode': 202,
@@ -413,23 +450,22 @@ def _get_location_name(location_id):
         open(TMPFILE, "w").write(json.dumps(locations))
     return locations[str(location_id)]
 
-def _send_message_to_sqs():
+def _send_message_to_sqs(data):
     sqs = boto3.client('sqs')
     q_url = os.environ['QUEUE_URL']
-    # q_url = 'https://sqs.us-west-2.amazonaws.com/267413481760/notification-q-dev'
 
-    d = {
-        'transactionId': '1',
-        'userId': '2',
-        'chargeAmount': '3',
-        'totalAmount': '4'
-    }
+    # data = {
+    #     'transactionId': '1',
+    #     'userId': '2',
+    #     'chargeAmount': '3',
+    #     'totalAmount': '4'
+    # }
 
     response = sqs.send_message(
         QueueUrl=q_url,
         DelaySeconds=0,
         MessageBody=(
-            json.dumps(d)
+            json.dumps(data)
         )
     )
 
