@@ -1,5 +1,5 @@
 BASEURL=https://x0eqiwmit9.execute-api.us-west-2.amazonaws.com/dev
-BASEURL=https://l12wa1q1z3.execute-api.us-west-2.amazonaws.com/dev
+# BASEURL=https://l12wa1q1z3.execute-api.us-west-2.amazonaws.com/dev
 
 USERA=`uuid`
 USERB=`uuid`
@@ -8,7 +8,7 @@ curl -XPOST -d "{\"id\":\"$USERA\",\"name\":\"$USERA\"}" $BASEURL/users
 echo
 
 echo "USER B: $USERB"
-curl -XPOST -d "{\"id\":\"$USERB\",\"name\":\"$USERB\"}" https://l12wa1q1z3.execute-api.us-west-2.amazonaws.com/dev/users
+curl -XPOST -d "{\"id\":\"$USERB\",\"name\":\"$USERB\"}" $BASEURL/users
 echo
 
 TA1=`uuid`
