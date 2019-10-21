@@ -28,28 +28,28 @@ provider:
 functions:
   CreateUser:
     handler: handler.user_create
-    reservedConcurrency: 1
+    # reservedConcurrency: 1
     events:
       - http:
           path: users
           method: post
   WalletCharge:
     handler: handler.wallet_charge
-    reservedConcurrency: 1
+    # reservedConcurrency: 1
     events:
       - http:
           path: wallet/charge
           method: post
   WalletUse:
     handler: handler.wallet_use
-    reservedConcurrency: 1
+    # reservedConcurrency: 1
     events:
       - http:
           path: wallet/use
           method: post
   WalletTransfer:
     handler: handler.wallet_transfer
-    reservedConcurrency: 1
+    # reservedConcurrency: 1
     events:
       - http:
           path: wallet/transfer
