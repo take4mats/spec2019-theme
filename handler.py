@@ -12,7 +12,7 @@ def user_create(event, context):
     wallet_table = boto3.resource('dynamodb').Table(os.environ['WALLET_TABLE'])
     body = json.loads(event['body'])
 
-    print(body)
+    print("req body: ", body)
 
     user_table.put_item(
         Item={
