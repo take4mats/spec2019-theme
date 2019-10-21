@@ -272,16 +272,7 @@ def get_user_summary(event, context):
     wallet = _query_wallet_by_user_id(wallet_table, params['userId']).get('Items').pop()
 
     payment_history = _query_history_by_wallet_id(history_table, wallet['id'])
-    # payment_history = history_table.scan(
-    #     ScanFilter={
-    #         'walletId': {
-    #             'AttributeValueList': [
-    #                 wallet['id']
-    #             ],
-    #             'ComparisonOperator': 'EQ'
-    #         }
-    #     }
-    # )
+ 
     sum_charge = 0
     sum_payment = 0
     times_per_location = {}
@@ -317,17 +308,6 @@ def get_payment_history(event, context):
     wallet = _query_wallet_by_user_id(wallet_table, params['userId']).get('Items').pop()
 
     payment_history_result = _query_history_by_wallet_id(history_table, wallet['id'])
-
-    # payment_history_result = history_table.scan(
-    #     ScanFilter={
-    #         'walletId': {
-    #             'AttributeValueList': [
-    #                 wallet['id']
-    #             ],
-    #             'ComparisonOperator': 'EQ'
-    #         }
-    #     }
-    # )
 
     payment_history = []
     for p in payment_history_result['Items']:
