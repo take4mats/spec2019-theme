@@ -86,9 +86,19 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
     PaymentHistoryTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -103,6 +113,7 @@ resources:
             KeyType: HASH
           - AttributeName: transactionId
             KeyType: RANGE
+
     # ApiGatewayStage:  # for apigw logging
     #   Type: AWS::ApiGateway::stage
     #   Properties:
