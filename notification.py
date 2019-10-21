@@ -23,3 +23,7 @@ def main():
     message = response['Messages'][0]
     body = json.loads(message['Body'])
     print(body)
+
+    result = requests.post(os.environ['NOTIFICATION_ENDPOINT'], json=data)
+    print(result)
+    return
