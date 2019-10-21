@@ -21,8 +21,8 @@ def main(event, context):
     )
 
     message = response['Messages'][0]
-    body = json.loads(message['Body'])
-    print(body)
+    data = json.loads(message['Body'])
+    print(data)
 
     result = requests.post(os.environ['NOTIFICATION_ENDPOINT'], json=data)
     print(result)
