@@ -11,7 +11,7 @@ def main(event, context):
     q_url = os.environ['QUEUE_URL']
 
     response = sqs.receive_message(
-        QueueUrl=url,
+        QueueUrl=q_url,
         AttributeNames=[
             'SentTimestamp'
         ],
